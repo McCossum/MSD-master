@@ -45,45 +45,50 @@ void setup() {
 }
 
 void loop() {
-  swValue = digitalRead(switch1); 
-  Serial.print("Switch one = ");
-  Serial.println(swValue);
-  if (swValue == 1) {
-    digitalWrite(greenLight, HIGH);
-    digitalWrite(yellowLight, LOW);
-    motor->step(1, BACKWARD, DOUBLE);
-    ltValue = analogRead(lightSensor2);     
-    Serial.print("Raw = ");
-    Serial.println(ltValue);
-    if (ltValue >= 350 && ltValueLast >= 350) {
-      digitalWrite(agitatorMotor, HIGH);
-      delay(500);  // waits for 0.25 second
-      if (i >= 4) {
-        if (n == 0) {
-          digitalWrite(agitatorMotor, LOW);
-          delay(500);  // waits for 0.25 second
-          n = 1;
-        } else {
-          n = 0;
+  while(true) {
+    swValue = digitalRead(switch1); 
+    Serial.print("Switch one = ");
+    Serial.println(swValue);
+    if (swValue == 1) {
+      digitalWrite(greenLight, HIGH);
+      digitalWrite(yellowLight, LOW);
+      digitalWrite(redLight, LOW);
+      motor->step(1, BACKWARD, DOUBLE);
+      ltValue = analogRead(lightSensor2);     
+      Serial.print("Raw = ");
+      Serial.println(ltValue);
+      if (ltValue >= 350 && ltValueLast >= 350) {
+        digitalWrite(agitatorMotor, HIGH);
+        delay(500);  // waits for 0.25 second
+        if (i >= 4) {
+          if (n == 0) {
+            digitalWrite(agitatorMotor, LOW);
+            delay(500);  // waits for 0.25 second
+            n = 1;
+          } else {
+            n = 0;
+          }
         }
-      }
-      if (i >= 20) {
-        digitalWrite(redLight, HIGH);
-        digitalWrite(greenLight, LOW);
+        if (i >= 20) {
+          break;
+        }
+        i += 1;
+      } else {
         digitalWrite(agitatorMotor, LOW);
-        motor->release();
-        break
       }
-      i += 1;
+      ltValueLast = ltValue;
     } else {
       digitalWrite(agitatorMotor, LOW);
+      motor->release();
+      digitalWrite(greenLight, LOW);
+      digitalWrite(yellowLight, HIGH);
+      digitalWrite(redLight, LOW);
     }
-    ltValueLast = ltValue;
-  } else {
-    digitalWrite(agitatorMotor, LOW);
-    motor->release();
-    digitalWrite(greenLight, LOW);
-    digitalWrite(yellowLight, HIGH);
   }
+  digitalWrite(agitatorMotor, LOW);
+  motor->release();
+  digitalWrite(greenLight, LOW);
+  digitalWrite(yellowLight, LOW);
+  digitalWrite(redLight, HIGH);
 }
 
