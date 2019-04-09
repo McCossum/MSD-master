@@ -20,9 +20,9 @@ int diamValue = 0;
 int lvValue = 0;
 int ltValue = 1000;
 int ltValueLast = 1000;
-int i = 0;
-int n = 0;
-int t = 0;
+int agTime = 0;
+int agToggle = 0;
+int runTime = 0;
 int GO = 1;
 
 void setup() {
@@ -86,7 +86,7 @@ void loop() {
       Serial.print("Light = ");
       Serial.println(ltValue);
       if (ltValue >= 50 && ltValueLast >= 50) {
-        if (i >= 20) { 
+        if (agTime >= 20) { 
           digitalWrite(agitatorMotor, LOW);
           motor->release();
           digitalWrite(greenLight, LOW);
@@ -95,32 +95,33 @@ void loop() {
           Serial.println("                    Stopped (agitator running too long)");
           GO = 0;
         } else {
-          if (i >= 4) {
+          if (agTime >= 4) {
             Serial.println("                    Freakout (agititor running a while)");
-            if (n == 0) {
+            if (agToggle == 0) {
               digitalWrite(agitatorMotor, LOW);
               delay(500);  // waits for 0.5 second
-              n = 1;
+              agToggle = 1;
             } else {
-              n = 0;
+              agToggle = 0;
             }
           }
           digitalWrite(agitatorMotor, HIGH);
           delay(500);  // waits for 0.5 second
         }
-        i += 1;
+        agTime += 1;
         Serial.print("                    Time agititor running:");
-        Serial.println(t);
+        Serial.println(runTime);
       } else {
+        agTime = 0;
         digitalWrite(agitatorMotor, LOW);
       }
-      if (t >= 2000) {
+      if (runTime >= 2000) {
         GO = 0; //                      Hash out for test code
       } else {
-        t += 1;
+        runTime += 1;
       }
       Serial.print("                    Time motor running:");
-      Serial.println(t);
+      Serial.println(runTime);
       ltValueLast = ltValue;
     } else {
       motor->release();
