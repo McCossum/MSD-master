@@ -2,7 +2,6 @@
 #include <Adafruit_MotorShield.h>
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_StepperMotor *motor = AFMS.getStepper(200, 1);
-#define switch1 35
 #define switch2 37
 #define switch3 39
 #define greenLight 29
@@ -16,7 +15,6 @@ Adafruit_StepperMotor *motor = AFMS.getStepper(200, 1);
 #define levelSensor 41
 float rawRange = 1024; // 3.3v
 float logRange = 5.0; // 3.3v = 10^5 lux
-int swValue = 0;
 int rodValue = 0;
 int diamValue = 0;
 int lvValue = 0;
@@ -29,7 +27,6 @@ int GO = 1;
 
 void setup() {
 
-  pinMode(switch1, INPUT);
   pinMode(switch2, INPUT);
   pinMode(switch3, INPUT);
   pinMode(lightSensor1, INPUT);
@@ -77,69 +74,57 @@ void setup() {
 
 void loop() {
   if(GO == 1) {
-    swValue = digitalRead(switch1); 
-    Serial.print("Switch one = ");
-    Serial.println(swValue);
-    if (swValue == 1) {
-      digitalWrite(greenLight, HIGH);
-      digitalWrite(yellowLight, LOW);
-      digitalWrite(redLight, LOW);
-      lvValue = digitalRead(levelSensor); 
-      Serial.print("Level sensor = ");
-      Serial.println(lvValue);
-      if (lvValue == 1) {
-        motor->step(1, BACKWARD, DOUBLE);
-        ltValue = analogRead(lightSensor2);     
-        Serial.print("Light = ");
-        Serial.println(ltValue);
-        if (ltValue >= 50 && ltValueLast >= 50) {
-          if (i >= 20) { 
-            digitalWrite(agitatorMotor, LOW);
-            motor->release();
-            digitalWrite(greenLight, LOW);
-            digitalWrite(yellowLight, LOW);
-            digitalWrite(redLight, HIGH);
-            Serial.println("                    Stopped (agitator running too long)");
-            GO = 0;
-          } else {
-            if (i >= 4) {
-              Serial.println("                    Freakout (agititor running a while)");
-              if (n == 0) {
-                digitalWrite(agitatorMotor, LOW);
-                delay(500);  // waits for 0.5 second
-                n = 1;
-              } else {
-                n = 0;
-              }
-            }
-            digitalWrite(agitatorMotor, HIGH);
-            delay(500);  // waits for 0.5 second
-          }
-          i += 1;
-          Serial.print("                    Time agititor running:");
-          Serial.println(t);
-        } else {
+    digitalWrite(greenLight, HIGH);
+    digitalWrite(yellowLight, LOW);
+    digitalWrite(redLight, LOW);
+    lvValue = digitalRead(levelSensor); 
+    Serial.print("Level sensor = ");
+    Serial.println(lvValue);
+    if (lvValue == 1) {
+      motor->step(1, BACKWARD, DOUBLE);
+      ltValue = analogRead(lightSensor2);     
+      Serial.print("Light = ");
+      Serial.println(ltValue);
+      if (ltValue >= 50 && ltValueLast >= 50) {
+        if (i >= 20) { 
           digitalWrite(agitatorMotor, LOW);
-        }
-        if (t >= 2000) {
-          GO = 0; //                      Hash out for test code
+          motor->release();
+          digitalWrite(greenLight, LOW);
+          digitalWrite(yellowLight, LOW);
+          digitalWrite(redLight, HIGH);
+          Serial.println("                    Stopped (agitator running too long)");
+          GO = 0;
         } else {
-          t += 1;
+          if (i >= 4) {
+            Serial.println("                    Freakout (agititor running a while)");
+            if (n == 0) {
+              digitalWrite(agitatorMotor, LOW);
+              delay(500);  // waits for 0.5 second
+              n = 1;
+            } else {
+              n = 0;
+            }
+          }
+          digitalWrite(agitatorMotor, HIGH);
+          delay(500);  // waits for 0.5 second
         }
-        Serial.print("                    Time motor running:");
+        i += 1;
+        Serial.print("                    Time agititor running:");
         Serial.println(t);
-        ltValueLast = ltValue;
       } else {
-        motor->release();
         digitalWrite(agitatorMotor, LOW);
       }
+      if (t >= 2000) {
+        GO = 0; //                      Hash out for test code
+      } else {
+        t += 1;
+      }
+      Serial.print("                    Time motor running:");
+      Serial.println(t);
+      ltValueLast = ltValue;
     } else {
-      digitalWrite(agitatorMotor, LOW);
       motor->release();
-      digitalWrite(greenLight, LOW);
-      //digitalWrite(yellowLight, HIGH);
-      digitalWrite(redLight, LOW);
-      Serial.println("                    Stalled");
+      digitalWrite(agitatorMotor, LOW);
     }
   } else {
     digitalWrite(agitatorMotor, LOW);
